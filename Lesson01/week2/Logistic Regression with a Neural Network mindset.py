@@ -213,7 +213,6 @@ w, b, X, Y = np.array([[1], [2]]), 2, np.array([[1,2], [3,4]]), np.array([[1, 0]
 grads, cost = propagate(w, b, X, Y)
 print ("dw = " + str(grads["dw"])) # dw = [[0.99993216]
                                    #     [1.99980262]]
-
 print ("db = " + str(grads["db"])) # db = 0.49993523062470574
 print ("cost = " + str(cost)) # cost = 6.000064773192205
 
@@ -379,8 +378,8 @@ def model(X_train, Y_train, X_test, Y_test, num_iterations=2000, learning_rate=0
     b = parameters["b"]
 
     # Predict test/train set examples (≈ 2 lines of code)
-    Y_prediction_test = predict(w, b, X_test)
     Y_prediction_train = predict(w, b, X_train)
+    Y_prediction_test = predict(w, b, X_test)
     ### END CODE HERE ###
 
     # Print train/test Errors
