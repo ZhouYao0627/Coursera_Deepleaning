@@ -16,29 +16,27 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import h5py
-import scipy
-from PIL import Image
-from scipy import ndimage
 from Lesson01.week2.lr_utils import load_dataset
 
+# 加载数据
 train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset()
 
-train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T
-test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T
+# 转置为一行数据
+train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T  # 转置后为(12288,209)  未转置前应是(209,12288)
+test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T  # 转置后为(12288,50)  未转置前应是(50,12288)
 
+# 将其标准化(采取了简易方法)
 train_set_x = train_set_x_flatten / 255
 test_set_x = test_set_x_flatten / 255
 
 
 def sigmoid(z):
     s = 1 / (1 + np.exp(-z))
-
     return s
 
 
 def initialize_with_zeros(dim):
-    w = np.zeros(shape=(dim, 1))
+    w = np.zeros(shape=(dim, 1))  # w现在是(12288, 1)
     b = 0
     assert (w.shape == (dim, 1))
     assert (isinstance(b, float) or isinstance(b, int))
@@ -47,14 +45,14 @@ def initialize_with_zeros(dim):
 
 
 def propagate(w, b, X, Y):
-    m = X.shape[1]
+    m = X.shape[1]  # m为样本数，即图片数209
 
     # 前向传播
-    A = sigmoid(np.dot(w.T, X) + b)
+    A = sigmoid(np.dot(w.T, X) + b)  # 此时A ---> (1, 209)
     cost = -(1 / m) * np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A))
 
     # 反向传播
-    dw = (1 / m) * np.dot(X, (A - Y).T)
+    dw = (1 / m) * np.dot(X, (A - Y).T)  # (12288, 1)
     db = (1 / m) * np.sum(A - Y)
 
     assert (dw.shape == w.shape)
@@ -70,6 +68,7 @@ def propagate(w, b, X, Y):
     return grads, cost
 
 
+# 在optimize里计算出最优的参数
 def optimize(w, b, X, Y, num_iterations, learning_rate, print_cost):
     costs = []  # list of all the costs computed during the optimization, this will be used to plot the learning curve
 
@@ -97,9 +96,9 @@ def optimize(w, b, X, Y, num_iterations, learning_rate, print_cost):
 
 
 def predict(w, b, X):
-    m = X.shape[1]
+    m = X.shape[1]  # 209
     Y_prediction = np.zeros((1, m))
-    w = w.reshape(X.shape[0], 1)
+    w = w.reshape(X.shape[0], 1)  # (12288, 1)
 
     A = sigmoid(np.dot(w.T, X) + b)
 
@@ -113,7 +112,7 @@ def predict(w, b, X):
 
 def model(X_train, Y_train, X_test, Y_test, num_iterations, learning_rate, print_cost=False):
     # 初始化W,b
-    w, b = initialize_with_zeros(X_train.shape[0])
+    w, b = initialize_with_zeros(X_train.shape[0])  # w现在是(12288, 1), b = 0
 
     # 梯度下降
     parameters, grads, costs = optimize(w, b, X_train, Y_train, num_iterations, learning_rate, print_cost)
@@ -144,6 +143,7 @@ def model(X_train, Y_train, X_test, Y_test, num_iterations, learning_rate, print
 
 
 d = model(train_set_x, train_set_y, test_set_x, test_set_y, num_iterations=2000, learning_rate=0.005, print_cost=True)
+
 # 绘制学习曲线
 costs = np.squeeze(d['costs'])
 plt.plot(costs)
