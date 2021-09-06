@@ -16,9 +16,6 @@ Once you've built nn_model() and learnt the right parameters, you can make predi
 import numpy as np
 import matplotlib.pyplot as plt
 from Lesson01.week3.testCases import *
-import sklearn
-import sklearn.datasets
-import sklearn.linear_model
 from Lesson01.week3.planar_utils import plot_decision_boundary, sigmoid, load_planar_dataset, load_extra_datasets
 
 np.random.seed(1)  # set a seed so that the results are consistent
@@ -286,6 +283,7 @@ plt.title("Decision Boundary for hidden layer size " + str(4))
 predictions = predict(parameters, X)
 print('准确率: %d' % float((np.dot(Y, predictions.T) + np.dot(1 - Y, 1 - predictions.T)) / float(Y.size) * 100) + '%')
 
+"""
 plt.figure(figsize=(16, 32))  # figsize：宽和高，单位是英尺
 hidden_layer_sizes = [1, 2, 3, 4, 5, 20, 50]  # 隐藏层数量
 for i, n_h in enumerate(hidden_layer_sizes):
@@ -296,3 +294,4 @@ for i, n_h in enumerate(hidden_layer_sizes):
     predictions = predict(parameters, X)
     accuracy = float((np.dot(Y, predictions.T) + np.dot(1 - Y, 1 - predictions.T)) / float(Y.size) * 100)
     print("隐藏层的节点数量： {}  ，准确率: {} %".format(n_h, accuracy))
+"""

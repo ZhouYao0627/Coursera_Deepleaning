@@ -4,19 +4,37 @@ import sklearn
 import sklearn.datasets
 import sklearn.linear_model
 
+'''
+①提供画图函数
+②提供激活函数
+③提供数据生成函数
+④提供数据生成函数
+'''
 
-def plot_decision_boundary(model, X, y):
+
+# 划分格子-得到每个格点的坐标-对每个格点的值进行预测(作为颜色区分)-画边界线-加上训练数据的散点图
+def plot_decision_boundary(model, X, y):  # (lambda x: predict(parameters, x.T), X, Y)
     # Set min and max values and give it some padding
-    x_min, x_max = X[0, :].min() - 1, X[0, :].max() + 1
+    x_min, x_max = X[0, :].min() - 1, X[0, :].max() + 1  # x_min就是X的第0行最小值再减一，...
     y_min, y_max = X[1, :].min() - 1, X[1, :].max() + 1
     h = 0.01
+
     # Generate a grid of points with distance h between them
+    # 生成网格矩阵
+    # 画格子图理解：1.xx返回每个格点的x坐标  2.yy返回的是每个格点的y坐标
+    # xx和yy是两个大小相等的矩阵
+    # xx和yy是提供坐标（xx,yy）
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+
     # Predict the function value for the whole grid
-    Z = model(np.c_[xx.ravel(), yy.ravel()])
+    # model()括号里的参数是每个格点的坐标
+    # #model的功能得到对应格点的预测结果 0或者1
+    # numpy中的ravel()、flatten()、squeeze()都有将多维数组转换为一维数组的功能
+    Z = model(np.c_[xx.ravel(), yy.ravel()])  # np.c_[xx.ravel(), yy.ravel()]就是model里的参数x
     Z = Z.reshape(xx.shape)
+
     # Plot the contour and training examples
-    plt.contourf(xx, yy, Z, cmap=plt.cm.Spectral)
+    plt.contourf(xx, yy, Z, cmap=plt.cm.Spectral)  # 找边界线
     plt.ylabel('x2')
     plt.xlabel('x1')
     plt.scatter(X[0, :], X[1, :], c=y, cmap=plt.cm.Spectral)
