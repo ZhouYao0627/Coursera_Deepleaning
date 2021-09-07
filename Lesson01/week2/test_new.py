@@ -20,13 +20,14 @@ from Lesson01.week2.lr_utils import load_dataset
 # 加载数据
 train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset()
 
-# 转置为一行数据
+# reshape and standardize the images before feeding them to the network
+# 转置为一行数据   Reshape the training and test examples
 train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T  # 转置后为(12288,209)  未转置前应是(209,12288)
 test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T  # 转置后为(12288,50)  未转置前应是(50,12288)
 
-# 将其标准化(采取了简易方法)
-train_set_x = train_set_x_flatten / 255
-test_set_x = test_set_x_flatten / 255
+# 将其标准化(采取了简易方法)   Standardize data to have feature values between 0 and 1.
+train_set_x = train_set_x_flatten / 255  # (12288,209)
+test_set_x = test_set_x_flatten / 255  # (12288,50)
 
 
 def sigmoid(z):
