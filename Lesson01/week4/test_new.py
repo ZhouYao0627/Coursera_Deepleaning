@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from Lesson01.week4 import testCases
+from PIL import Image
 from Lesson01.week4.dnn_utils import sigmoid, sigmoid_backward, relu, relu_backward
 from Lesson01.week4 import lr_utils
 
@@ -9,14 +9,18 @@ train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = lr_utils.l
 
 # reshape and standardize the images before feeding them to the network
 # 转置为一行数据   Reshape the training and test examples
-train_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T  # 转置后为(12288,209)  未转置前应是(209,12288)
-test_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T  # 转置后为(12288,50)  未转置前应是(50,12288)
+train_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T  # 转置后为(12288,209)  未转置前是(209,12288)
+test_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T  # 转置后为(12288,50)  未转置前是(50,12288)
 
 # 将其标准化(采取了简易方法)   Standardize data to have feature values between 0 and 1.
 train_x = train_x_flatten / 255  # (12288,209)
-train_y = train_set_y
+train_y = train_set_y  # (1, 209)
 test_x = test_x_flatten / 255  # (12288,50)
-test_y = test_set_y
+test_y = test_set_y  # (1, 50)
+
+m_train = train_set_x_orig.shape[0]  # 209
+num_px = train_set_x_orig.shape[1]  # 64
+m_test = test_set_x_orig.shape[0]  # 50
 
 
 # 两层神经网络：初始化参数
@@ -303,5 +307,48 @@ def L_layer_model(X, Y, layers_dims, learning_rate, num_iterations, print_cost):
 layers_dims = [12288, 20, 7, 5, 1]  # 5-layer model
 parameters = L_layer_model(train_x, train_y, layers_dims, learning_rate=0.0075, num_iterations=2500, print_cost=True)
 
-predictions_train = predict(train_x, train_y, parameters)  # 训练集
-predictions_test = predict(test_x, test_y, parameters)  # 测试集
+pred_train = predict(train_x, train_y, parameters)  # 训练集
+pred_test = predict(test_x, test_y, parameters)  # 测试集
+
+
+# 绘制预测和实际不同的图像
+def print_mislabeled_images(classes, X, y, p):
+    """
+    X - 数据集
+    y - 实际的标签
+    p - 预测
+    """
+
+    a = p + y  # 由下行可以理解为，a是预测的与实际不同的图像  a.shape = (1, 50)
+    mislabeled_indices = np.asarray(np.where(a == 1))
+    # np.where返回的是tuple；这里的np.asarray返回的是2行，a==1个数的列；第一行都是0，第二行里的数是预测错的样本/图片所在的列
+    plt.rcParams['figure.figsize'] = (40.0, 40.0)  # set default size of plots
+    num_images = len(mislabeled_indices[0])  # 即样本/图像的数量
+    for i in range(num_images):  # 预测错的图片不止一个，故使用循环
+        index = mislabeled_indices[1][i]
+
+        plt.subplot(2, num_images, i + 1)  # 2行，num_images列，i+1表示从左到右从上到下的第i+1个位置。
+        plt.imshow(X[:, index].reshape(64, 64, 3), interpolation='nearest')  # X[:, index]其实就是第index个样本/图像
+        plt.axis('off')
+        plt.title(
+            "Prediction: " + classes[int(p[0, index])].decode("utf-8") + " \n Class: " + classes[y[0, index]].decode(
+                "utf-8"))
+    plt.show()
+
+
+print_mislabeled_images(classes, test_x, test_y, pred_test)
+
+# 测试自己的图片
+my_image = "E:/Pycharm/work/Coursera_Deepleaning/Lesson01/week4/pictures/my_image2.jpg"  # change this to the name of your image file
+my_label_y = [1]  # the true class of your image (1 -> cat, 0 -> non-cat)
+
+# 读取图片，将其转化为三通道，并resize为64*64分辨率
+image = Image.open(my_image).convert("RGB").resize((num_px, num_px))
+
+# 将图片转化为矩阵形式并reshape以满足模型输入格式
+my_image = np.array(image).reshape(num_px * num_px * 3, -1)
+
+my_predict_image = predict(my_image, my_label_y, parameters)
+plt.imshow(my_image)
+# print("y = " + str(np.squeeze(my_predict_image)) + ", your L-layer model predicts a \"" + classes[
+#     int(np.squeeze(my_predict_image))].decode("utf-8") + "\"picture.")

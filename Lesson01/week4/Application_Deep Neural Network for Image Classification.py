@@ -458,7 +458,6 @@ train_y = train_set_y
 test_x = test_x_flatten / 255  # (12288,50)
 test_y = test_set_y
 
-
 # CONSTANTS DEFINING THE MODEL
 # n_x = 12288  # num_px * num_px * 3
 # n_h = 7
@@ -466,6 +465,8 @@ test_y = test_set_y
 # layers_dims = (n_x, n_h, n_y)
 
 """测试与预测两层神经网络结构"""
+
+
 # layers_dims = [12288, 7, 1]
 # parameters = two_layer_model(train_x, train_set_y, layers_dims, num_iterations=2500, print_cost=True,
 #                              isPlot=True)
@@ -532,12 +533,12 @@ pred_train = predict(train_x, train_y, parameters)  # 训练集
 pred_test = predict(test_x, test_y, parameters)  # 测试集
 
 
+# 绘制预测和实际不同的图像
 def print_mislabeled_images(classes, X, y, p):
     """
-	绘制预测和实际不同的图像。
-	    X - 数据集
-	    y - 实际的标签
-	    p - 预测
+    X - 数据集
+    y - 实际的标签
+    p - 预测
     """
 
     a = p + y
