@@ -2,6 +2,8 @@ import numpy as np
 import h5py
 
 """
+train_dataset是文件类型，不能查看其shape，即'File' object has no attribute 'shape'
+
 train_set_x_orig ：保存的是训练集里面的图像数据（本训练集有209张64x64的图像）。
 train_set_y_orig ：保存的是训练集的图像对应的分类值（【0 | 1】，0表示不是猫，1表示是猫）。
 test_set_x_orig ：保存的是测试集里面的图像数据（本训练集有50张64x64的图像）。
@@ -14,6 +16,8 @@ train_dataset["train_set_x"].shape ---> (209, 64, 64, 3)
 train_dataset["train_set_y"].shape ---> (209,)
 test_dataset["test_set_x"].shape ---> (50, 64, 64, 3)
 test_dataset["test_set_y"].shape ---> (50,)
+train_dataset["list_classes"].sahpe ---> (2,)
+test_dataset["list_classes"].sahpe ---> (2,)
 """
 
 

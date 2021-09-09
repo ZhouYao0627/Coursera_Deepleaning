@@ -24,7 +24,9 @@ m_test = test_set_x_orig.shape[0]  # 50
 
 
 # 两层神经网络：初始化参数
-def initialize_parameters(n_x, n_h, n_y):
+def initialize_parameters(layers_dims):
+    n_x, n_h, n_y = layers_dims
+
     W1 = np.random.randn(n_h, n_x) * 0.01
     b1 = np.zeros((n_h, 1))
     W2 = np.random.randn(n_y, n_h) * 0.01
@@ -69,6 +71,7 @@ def linear_activation_forward(A_prev, W, b, activation):
     return A, cache
 
 
+# 计算代价
 def compute_cost(AL, Y):
     m = Y.shape[1]
 
@@ -126,12 +129,11 @@ def update_parameters(parameters, grads, learning_rate):
 # 该模型可以概括为：INPUT -> LINEAR -> RELU -> LINEAR -> SIGMOID -> OUTPUT
 def two_layer_model(X, Y, layers_dims, learning_rate, num_iterations, print_cost):
     np.random.seed(1)
-    n_x, n_h, n_y = layers_dims
     grads = {}
     costs = []
 
     # 初始化参数
-    parameters = initialize_parameters(n_x, n_h, n_y)
+    parameters = initialize_parameters(layers_dims)
     W1 = parameters['W1']
     b1 = parameters['b1']
     W2 = parameters['W2']
@@ -216,9 +218,11 @@ def L_model_forward(X, parameters):
     for l in range(1, L):
         A_prev = A
         A, cache = linear_activation_forward(A_prev, parameters['W' + str(l)], parameters['b' + str(l)], "relu")
-        caches.append(cache)
+        # (上行)此时的A为下个前向传播的A_prev
+        caches.append(cache)  # 将cache储存起来，留反向传播时使用
 
     AL, cache = linear_activation_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], "sigmoid")
+    # (上行)这里的传入的A是经过循环的，最后一个隐藏层的A，就相当于A(L-1)
     caches.append(cache)
 
     assert (AL.shape == (1, X.shape[1]))
@@ -233,17 +237,32 @@ def L_model_backward(AL, Y, caches):
     dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
     grads = {}
 
-    current_cache = caches[-1]
-    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache,
-                                                                                                  "sigmoid")
-    # 上方两行代码将下方两行代码整合到一起了，更加简易（因为我们已经设计了linear_activation_backward，而它内部已经调用了linear_backward并完成了一系列工作）
-    # grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_backward(
-    #     sigmoid_backward(dAL, current_cache[1]), current_cache[0])
+    ### 原版方法，只是写法较难理解--->可看链接https://blog.csdn.net/u013733326/article/details/79767169下方讨论
+    # current_cache = caches[-1]
+    # grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache,
+    #                                                                                               "sigmoid")
+    # # 上方两行代码将下方两行代码整合到一起了，更加简易（因为我们已经设计了linear_activation_backward，而它内部已经调用了linear_backward并完成了一系列工作）
+    # # grads["dA_prev" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_backward(
+    # #     sigmoid_backward(dAL, current_cache[1]), current_cache[0])
+    #
+    # # 第L个已经在上方求过了，剩下的只有L-1个，然后将其反向遍历，再进行计算; 由于for l in reversed(range(L-1))这句，其实l是从L-2这里开始的
+    # for l in reversed(range(L - 1)):
+    #     current_cache = caches[l]
+    #     dA_prev_temp, dW_temp, db_temp = linear_activation_backward(grads["dA" + str(l + 2)], current_cache, "relu")
+    #     grads["dA" + str(l + 1)] = dA_prev_temp
+    #     grads["dW" + str(l + 1)] = dW_temp
+    #     grads["db" + str(l + 1)] = db_temp
 
-    for l in reversed(range(L - 1)):  # 第L个已经在上方求过了，剩下的只有L-1个，然后将其反向遍历，再进行计算
+    ### 经过修改的方法，较易理解
+    current_cache = caches[-1]
+    grads["dA" + str(L - 1)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL,
+                                                                                                      current_cache,
+                                                                                                      "sigmoid")
+    # 第L个已经在上方求过了，剩下的只有L-1个，然后将其反向遍历，再进行计算; 由于for l in reversed(range(L-1))这句，其实l是从L-2这里开始的
+    for l in reversed(range(L - 1)):
         current_cache = caches[l]
-        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(grads["dA" + str(l + 2)], current_cache, "relu")
-        grads["dA" + str(l + 1)] = dA_prev_temp
+        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(grads["dA" + str(l + 1)], current_cache, "relu")
+        grads["dA" + str(l)] = dA_prev_temp
         grads["dW" + str(l + 1)] = dW_temp
         grads["db" + str(l + 1)] = db_temp
 
